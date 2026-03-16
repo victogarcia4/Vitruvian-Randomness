@@ -1,0 +1,5 @@
+{
+  "name": "Vitruvian Randomness",
+  "description": "A sophisticated random selector with a spinning wheel, inspired by classical aesthetics. Supports names, numbers, and multiple winners (1-5).",
+  "requestFramePermissions": []
+}
