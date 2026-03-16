@@ -48,6 +48,7 @@ export default function App() {
     { id: '6', text: 'Caravaggio', color: CLASSICAL_COLORS[5] },
   ]);
   const [inputText, setInputText] = useState('');
+  const [rangeInput, setRangeInput] = useState('1-10');
   const [isSpinning, setIsSpinning] = useState(false);
   const [winners, setWinners] = useState<Item[]>([]);
   const [winnerHistory, setWinnerHistory] = useState<WinnerEntry[]>([]);
@@ -358,11 +359,25 @@ export default function App() {
     setItems(shuffled);
   };
 
-  const generateNumbers = (count: number) => {
+  const generateNumbers = (rangeStr: string) => {
+    const parts = rangeStr.split('-').map(p => parseInt(p.trim()));
+    let start = 1;
+    let end = 10;
+    
+    if (parts.length === 1 && !isNaN(parts[0])) {
+      end = parts[0];
+    } else if (parts.length === 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+      start = parts[0];
+      end = parts[1];
+    }
+
+    if (start > end) [start, end] = [end, start];
+    const count = Math.min(Math.max(end - start + 1, 1), 500); // Limit to 500 items for performance
+    
     const newItems = Array.from({ length: count }, (_, i) => ({
       id: Math.random().toString(36).substr(2, 9),
-      text: (i + 1).toString(),
-      color: CLASSICAL_COLORS[i % CLASSICAL_COLORS.length],
+      text: (start + i).toString(),
+      color: CLASSICAL_COLORS[(start + i - 1) % CLASSICAL_COLORS.length],
     }));
     setItems(newItems);
   };
@@ -463,12 +478,22 @@ export default function App() {
 
         <div className="space-y-4">
           <div className="flex gap-2">
-            <button 
-              onClick={() => generateNumbers(10)}
-              className="flex-1 py-2 px-3 bg-white border border-ink/10 rounded-lg flex items-center justify-center gap-2 hover:bg-gold hover:text-white transition-all text-sm font-medium"
-            >
-              <Hash size={16} /> Numbers
-            </button>
+            <div className="flex-1 flex bg-white border border-ink/10 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-gold transition-all">
+              <input 
+                type="text"
+                value={rangeInput}
+                onChange={(e) => setRangeInput(e.target.value)}
+                placeholder="1-100"
+                className="w-full px-3 py-2 outline-none text-sm"
+              />
+              <button 
+                onClick={() => generateNumbers(rangeInput)}
+                className="px-3 bg-gold text-white hover:bg-gold/90 transition-colors"
+                title="Generate Range"
+              >
+                <Hash size={16} />
+              </button>
+            </div>
             <button 
               onClick={() => setItems([{ id: '1', text: 'Yes', color: CLASSICAL_COLORS[0] }, { id: '2', text: 'No', color: CLASSICAL_COLORS[1] }])}
               className="flex-1 py-2 px-3 bg-white border border-ink/10 rounded-lg flex items-center justify-center gap-2 hover:bg-gold hover:text-white transition-all text-sm font-medium"
